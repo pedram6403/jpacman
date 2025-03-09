@@ -194,38 +194,101 @@ public class Level {
         }
     }
 
+    // /**
+    //  * Starts or resumes this level, allowing movement and (re)starting the
+    //  * NPCs.
+    //  */
+    // public void start() {
+    //     synchronized (startStopLock) {
+    //         if (isInProgress()) {
+    //             return;
+    //         }
+    //         startNPCs();
+    //         inProgress = true;
+    //         updateObservers();
+    //     }
+    // }
+
+    // /**
+    //  * Stops or pauses this level, no longer allowing any movement on the board
+    //  * and stopping all NPCs.
+    //  */
+    // public void stop() {
+    //     synchronized (startStopLock) {
+    //         if (!isInProgress()) {
+    //             return;
+    //         }
+    //         stopNPCs();
+    //         inProgress = false;
+    //     }
+    // }
+
     /**
-     * Starts or resumes this level, allowing movement and (re)starting the
-     * NPCs.
+     * Starts all NPC movement scheduling.
      */
-    public void start() {
+
+    // /**
+    //  * Starts or resumes this level, allowing movement and (re)starting the
+    //  * NPCs.
+    //  */
+    // public void start() {
+    //     synchronized (startStopLock) {
+    //         if (isInProgress()) {
+    //             return;
+    //         }
+    //         startNPCs();
+    //         inProgress = true;
+    //         updateObservers();
+    //     }
+    // }
+
+    // /**
+    //  * Stops or pauses this level, no longer allowing any movement on the board
+    //  * and stopping all NPCs.
+    //  */
+    // public void stop() {
+    //     synchronized (startStopLock) {
+    //         if (!isInProgress()) {
+    //             return;
+    //         }
+    //         stopNPCs();
+    //         inProgress = false;
+    //     }
+    // }
+
+    /**
+ * Sets the game state, handling NPC scheduling accordingly.
+ *
+ * @param isStarting True to start the game, false to stop it.
+ */
+    private void setGameState(boolean isStarting) {
         synchronized (startStopLock) {
-            if (isInProgress()) {
-                return;
+            if (isStarting && !isInProgress()) {
+                startNPCs();
+                inProgress = true;
+            } else if (!isStarting && isInProgress()) {
+                stopNPCs();
+                inProgress = false;
             }
-            startNPCs();
-            inProgress = true;
             updateObservers();
         }
     }
-
+    
+    /**
+     * Starts or resumes this level, allowing movement and (re)starting the NPCs.
+     */
+    public void start() {
+        setGameState(true);
+    }
+    
     /**
      * Stops or pauses this level, no longer allowing any movement on the board
      * and stopping all NPCs.
      */
     public void stop() {
-        synchronized (startStopLock) {
-            if (!isInProgress()) {
-                return;
-            }
-            stopNPCs();
-            inProgress = false;
-        }
+        setGameState(false);
     }
 
-    /**
-     * Starts all NPC movement scheduling.
-     */
     private void startNPCs() {
         for (final Ghost npc : npcs.keySet()) {
             ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
